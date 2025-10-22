@@ -4,9 +4,13 @@ import logging
 from contextlib import asynccontextmanager
 from typing import AsyncIterator
 
+from dotenv import load_dotenv
 from fastapi import FastAPI
 
 from datalayer import init_supabase_client
+
+# Load environment variables from .env file
+load_dotenv()
 
 logger = logging.getLogger(__name__)
 
@@ -29,12 +33,10 @@ def _bootstrap_supabase() -> None:
 def register_routes(app: FastAPI) -> None:
     """
     Import and include routers here.
-
-    Example:
-
-        from routes import users
-        app.include_router(users.router, prefix=\"/users\", tags=[\"Users\"])
     """
+    from routes import courses
+    app.include_router(courses.router, prefix="/courses", tags=["Courses"])
+
     # No routers yet—add them here as the project grows.
 
 
