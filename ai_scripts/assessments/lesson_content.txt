@@ -1,0 +1,7 @@
+Python is a high-level, interpreted programming language, created by Guido van Rossum and first released in 1991. Its design philosophy emphasizes code readability, notably using significant whitespace. It provides constructs that enable clear programming on both small and large scales, making it a popular choice for beginners and experts alike.
+
+As an interpreted language, Python code is executed line by line, which simplifies debugging. It is also dynamically-typed, meaning you do not need to explicitly declare variable types like 'int' or 'str'. The type is determined at runtime, offering significant flexibility. This contrasts with statically-typed languages where type-checking is done at compile-time.
+
+Python supports several built-in data types. The most common are numeric types (integers, floats), string types (str) for text, and boolean types (True, False). It also features powerful collection types: lists (ordered and mutable), tuples (ordered and immutable), and dictionaries (unordered key-value pairs).
+
+Due to its simplicity and a vast ecosystem of third-party libraries, Python is used in many domains. It is a dominant force in data science and machine learning (using libraries like Pandas, NumPy, and TensorFlow), web development (with frameworks like Django and Flask), and automation/scripting.
