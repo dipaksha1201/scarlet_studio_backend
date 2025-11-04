@@ -14,14 +14,14 @@ router = APIRouter()
 class CourseCreate(BaseModel):
     instructor_id: str
     title: str
-    learning_objectives: Optional[str] = None
+    learning_objective: Optional[str] = None
     learner_persona: Optional[str] = None
     prerequisites: Optional[str] = None
 
 
 class CourseUpdate(BaseModel):
     title: Optional[str] = None
-    learning_objectives: Optional[str] = None
+    learning_objective: Optional[str] = None
     learner_persona: Optional[str] = None
     prerequisites: Optional[str] = None
 
@@ -32,7 +32,7 @@ class CourseUpdate(BaseModel):
 @router.post("/", tags=["Courses"])
 def create_course(payload: CourseCreate):
     """
-    Create a new draft course.
+    Create a new course (Instructor provides Objective, Persona, Prerequisites).
     """
     client = get_supabase_client()
     data = payload.dict()
@@ -47,7 +47,7 @@ def create_course(payload: CourseCreate):
 @router.put("/{course_id}", tags=["Courses"])
 def update_course(course_id: str, payload: CourseUpdate):
     """
-    Update an existing draft course.
+    Update a course (edit Learning Objective, Persona, Prerequisites, etc.)
     """
     client = get_supabase_client()
     data = {k: v for k, v in payload.dict().items() if v is not None}
@@ -64,7 +64,7 @@ def update_course(course_id: str, payload: CourseUpdate):
 @router.get("/instructor/{instructor_id}", tags=["Courses"])
 def get_instructor_courses(instructor_id: str):
     """
-    Get all courses belonging to an instructor.
+    Retrieve all courses belonging to an instructor.
     """
     client = get_supabase_client()
     try:
@@ -74,44 +74,15 @@ def get_instructor_courses(instructor_id: str):
         raise HTTPException(status_code=500, detail=f"Failed to fetch instructor courses: {e}")
 
 
-@router.post("/{course_id}/publish", tags=["Courses"])
-def publish_course(course_id: str):
-    """
-    Mark a course as 'published'.
-    """
-    client = get_supabase_client()
-    try:
-        result = (
-            client.table("courses")
-            .update({"status": "published"})
-            .eq("id", course_id)
-            .execute()
-        )
-        if not result.data:
-            raise HTTPException(status_code=404, detail="Course not found")
-        return {"message": "Course published", "data": result.data}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to publish course: {e}")
-
-
 @router.get("/{course_id}/modules", tags=["Courses"])
 def get_modules_for_course(course_id: str):
     """
-    Retrieve all modules for a given course (mock data if none).
+    Retrieve all modules for a given course.
     """
     client = get_supabase_client()
     try:
         result = client.table("modules").select("*").eq("course_id", course_id).execute()
-        if not result.data:
-            return {
-                "modules": [
-                    {
-                        "id": "mock-1",
-                        "title": "Getting Started",
-                        "description": "Introductory module (placeholder).",
-                    }
-                ]
-            }
         return {"modules": result.data}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to get modules: {e}")
+
