@@ -54,7 +54,7 @@ source venv/bin/activate
 From your activated virtual environment, run the following command to install the necessary Python libraries:
 
 ```bash
-pip install langgraph google-generativeai pydantic python-dotenv
+pip install langgraph google-generativeai pydantic python-dotenv 
 ```
 
 
