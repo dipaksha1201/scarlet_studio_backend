@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 from fastapi import FastAPI
 
 from datalayer import init_supabase_client
+from routes import courses, agents
 
 # Load environment variables from .env file
 load_dotenv()
@@ -34,10 +35,10 @@ def register_routes(app: FastAPI) -> None:
     """
     Import and include routers here.
     """
-    from routes import courses
-    app.include_router(courses.router, prefix="/courses", tags=["Courses"])
+    
 
-    # No routers yet—add them here as the project grows.
+    app.include_router(courses.router, prefix="/courses", tags=["Courses"])
+    app.include_router(agents.router, prefix="/agents", tags=["AI Agents"])
 
 
 @asynccontextmanager
