@@ -1,0 +1,31 @@
+{
+  "modules": [
+    {
+      "id": "m1",
+      "title": "Introduction to Web APIs",
+      "paragraphs": [
+        "Web APIs allow different software systems to communicate over the internet using HTTP protocols.",
+        "REST is an architectural style that uses standard HTTP methods like GET, POST, PUT, and DELETE.",
+        "JSON is a lightweight data interchange format commonly used to serialize structured data for APIs."
+      ],
+      "meta": {
+        "level": "beginner",
+        "topics": ["HTTP", "REST", "JSON"]
+      }
+    },
+    {
+      "id": "m2",
+      "title": "Basics of Machine Learning",
+      "paragraphs": [
+        "Supervised learning uses labeled datasets to train models that can make predictions on new data.",
+        "Unsupervised learning finds patterns in data without explicit labels, such as clustering.",
+        "Evaluation metrics like accuracy, precision, and recall help assess model performance."
+      ],
+      "meta": {
+        "level": "intermediate",
+        "topics": ["supervised", "unsupervised", "evaluation"]
+      }
+    }
+  ]
+}
+

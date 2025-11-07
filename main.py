@@ -5,6 +5,7 @@ from contextlib import asynccontextmanager
 from typing import AsyncIterator
 
 from fastapi import FastAPI
+from routes import modules, assessments
 
 from datalayer import init_supabase_client
 
@@ -36,6 +37,8 @@ def register_routes(app: FastAPI) -> None:
         app.include_router(users.router, prefix=\"/users\", tags=[\"Users\"])
     """
     # No routers yet—add them here as the project grows.
+    app.include_router(modules.router)
+    app.include_router(assessments.router)
 
 
 @asynccontextmanager
@@ -58,3 +61,8 @@ app = FastAPI(
 async def healthcheck() -> dict[str, str]:
     """Simple endpoint that reports service status."""
     return {"status": "ok"}
+
+
+@app.get("/")
+def root():
+    return {"status": "ok", "service": "assessment-designer"}
