@@ -138,6 +138,4 @@ To add new agents:
  4. Import it in main.py
  5. Optionally include in /pipeline/run chain
 
-License
--------
-MIT License © 2025 Your Name
+
