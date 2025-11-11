@@ -3,191 +3,169 @@ import json
 from typing import List
 from dotenv import load_dotenv
 import google.generativeai as genai
-from supabase import create_client, Client
 
-# ============================================================
-# ✅ 1. LOAD .env (with debug prints)
-# ============================================================
 
-print("🔍 Loading .env…")
+# --------------------------------------------------
+# Load environment
+# --------------------------------------------------
 load_dotenv()
 
-SUPABASE_URL = os.getenv("SUPABASE_URL")
-SUPABASE_SERVICE_KEY = os.getenv("SUPABASE_SERVICE_KEY")
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
-
-if not SUPABASE_URL or not SUPABASE_SERVICE_KEY:
-    raise ValueError("❌ Supabase URL or SERVICE KEY missing!")
-
 if not GOOGLE_API_KEY:
-    raise ValueError("❌ Google API Key missing!")
+    raise ValueError("Missing GOOGLE_API_KEY in .env")
 
-supabase: Client = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
+# Configure the Google client
 genai.configure(api_key=GOOGLE_API_KEY)
 model = genai.GenerativeModel("gemini-2.5-pro")
 
-# ===============================================================
-# ✅ Fetch module + content + learner persona
-# ===============================================================
+
+# --------------------------------------------------
+# Load Module Content From content.json
+# --------------------------------------------------
+def load_module_content(module_id: str) -> str:
+    json_path = os.path.join(os.path.dirname(__file__), "content.json")
+    if not os.path.exists(json_path):
+        raise FileNotFoundError("content.json missing.")
+
+    try:
+        with open(json_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+    except UnicodeDecodeError as e:
+        raise UnicodeDecodeError(
+            e.encoding or "utf-8",
+            e.object,
+            e.start,
+            e.end,
+            f"Failed to decode content.json. Ensure the file is saved as UTF-8. Original: {e}",
+        )
+
+    if not isinstance(data, list):
+        raise ValueError("content.json must be a JSON array of objects.")
+
+    # Filter by module_id; accept either 'generated_text' or 'text' as payload key
+    chunks: List[str] = []
+    for item in data:
+        if item.get("module_id") == module_id:
+            payload = item.get("generated_text") or item.get("text")
+            if isinstance(payload, str) and payload.strip():
+                chunks.append(payload.strip())
+
+    if not chunks:
+        raise ValueError(f"No content found for module_id: {module_id}")
+
+    return "\n\n".join(chunks)
 
 
-def fetch_module_context(module_id):
-    # Fetch module
-    mod = supabase.table("modules").select("*").eq("id", module_id).execute()
-    if not mod.data:
-        raise ValueError("❌ Module not found.")
-
-    module = mod.data[0]
-    print("Module found:", module["title"])
-
-    # Fetch course
-    course = (
-        supabase.table("courses").select("*").eq("id", module["course_id"]).execute()
-    )
-    print("Course found:", course.data[0]["title"] if course.data else "N/A")
-
-    persona = course.data[0]["learner_persona"] if course.data else "curious learner"
-    print("Learner persona:", persona)
-
-    # Fetch lesson content
-    contents = (
-        supabase.table("contents").select("*").eq("module_id", module_id).execute()
-    )
-
-    lesson_blocks = [
-        c["generated_text"] for c in contents.data if c.get("generated_text")
-    ]
-
-    if not lesson_blocks:
-        raise ValueError("❌ No generated_text found for this module in contents.")
-
-    lesson_text = "\n\n".join(lesson_blocks)
-
-    return module, persona, lesson_text
-
-
-# ===============================================================
-# ✅ Create chat session in assessments
-# ===============================================================
-
-
-def create_chat_session(module_id):
-    new_chat = {
-        "type": "chat_history",
-        "content_id": module_id,
-        "content": {"messages": []},
-    }
-    row = supabase.table("assessments").insert(new_chat).execute()
-    return row.data[0]["id"]
-
-
-def append_message(assessment_id, role, text):
-    row = (
-        supabase.table("assessments")
-        .select("*")
-        .eq("id", assessment_id)
-        .execute()
-        .data[0]
-    )
-    content = row["content"]
-
-    if "messages" not in content:
-        content["messages"] = []
-
-    content["messages"].append({"role": role, "text": text})
-
-    supabase.table("assessments").update({"content": content}).eq(
-        "id", assessment_id
-    ).execute()
-
-
-# ===============================================================
-# ✅ Guardrails
-# ===============================================================
-
-
-def is_in_scope(question: str, lesson_text: str):
-    words = [w.lower() for w in question.split()]
-    hits = sum(1 for w in words if w in lesson_text.lower())
-
-    return hits > 0  # at least one overlap
-
-
-# ===============================================================
-# ✅ LLM Response
-# ===============================================================
-
-
-def generate_answer(lesson, persona, history, question):
+# --------------------------------------------------
+# Build Prompt With Guardrails
+# --------------------------------------------------
+def build_prompt(lesson_content: str, history: List[dict]) -> List[dict]:
     system_prompt = f"""
-You are a personalized Q&A tutor.
+You are a university Q&A tutor. Your knowledge is STRICTLY LIMITED to the following module:
 
-Persona: {persona}
+==========================
+{lesson_content}
+==========================
 
 RULES:
-- Only answer using the lesson content provided.
-- If question is off-topic, politely redirect back to the module.
-- Keep responses short (2-4 sentences).
-- Do NOT add information not found in the lesson.
-
-LESSON CONTENT:
----------------------------
-{lesson}
----------------------------
+- Answer ONLY using the above content.
+- If the user asks something outside the content, respond: "I can only answer based on the current module content."
+- Be short, and clear.
+- Set the tone: professor in a university course.
 """
 
+    # Start the conversation by injecting the guardrails
     messages = [{"role": "user", "parts": [system_prompt]}]
 
-    for msg in history:
-        messages.append({"role": msg["role"], "parts": [msg["text"]]})
+    # Then append the running dialogue
+    for turn in history:
+        # Ensure roles are only 'user' or 'model'
+        role = "user" if turn["role"] == "user" else "model"
+        messages.append({"role": role, "parts": [turn["content"]]})
 
-    messages.append({"role": "user", "parts": [question]})
-
-    response = model.generate_content(messages)
-    return response.text
-
-
-# ===============================================================
-# ✅ Main Chat Loop (Terminal)
-# ===============================================================
+    return messages
 
 
+# --------------------------------------------------
+# Save chat history locally
+# --------------------------------------------------
+def save_history(module_id: str, history: List[dict]):
+    history_file = "chat_history.json"
+
+    # Load old history if exists
+    if os.path.exists(history_file):
+        try:
+            with open(history_file, "r", encoding="utf-8") as f:
+                full_history = json.load(f)
+        except Exception:
+            full_history = {}
+    else:
+        full_history = {}
+
+    # Append to module-specific history
+    if module_id not in full_history:
+        full_history[module_id] = []
+
+    full_history[module_id].extend(history)
+
+    # Save back
+    with open(history_file, "w", encoding="utf-8") as f:
+        json.dump(full_history, f, indent=2, ensure_ascii=False)
+
+
+# --------------------------------------------------
+# Main Chat Loop
+# --------------------------------------------------
 def main():
-    print("\n✅ Scarlet Q&A Tutor")
+    print("  Scarlet Q&A Tutor\n")
+
     module_id = input("Enter module_id: ").strip()
+    print("Loading module content...")
 
-    module, persona, lesson = fetch_module_context(module_id)
+    try:
+        lesson_content = load_module_content(module_id)
+    except Exception as e:
+        print(f"\nError loading module content: {e}")
+        return
 
-    assessment_id = create_chat_session(module_id)
-    print(f"✅ Chat session started: {assessment_id}\n")
+    print("\n  Module loaded. Ask questions about this module. Type 'quit' to exit.\n")
 
-    history = []
+    chat_history: List[dict] = []
 
-    while True:
-        user_q = input("You: ")
+    try:
+        while True:
+            user_msg = input("Your question (or 'quit'): ").strip()
+            if user_msg.lower() in {"quit", "exit", "stop"}:
+                break
+            if not user_msg:
+                continue
 
-        if user_q.lower() in ["quit", "exit", "bye"]:
-            print("👋 Ending chat.")
-            break
+            # Save user message
+            chat_history.append({"role": "user", "content": user_msg})
 
-        # Guardrail check
-        if not is_in_scope(user_q, lesson):
-            bot = "That question is outside today's module. Let's focus on the lesson."
-            print("Tutor:", bot)
-            append_message(assessment_id, "user", user_q)
-            append_message(assessment_id, "assistant", bot)
-            continue
+            # Build prompt (guardrails + full history)
+            messages = build_prompt(lesson_content, chat_history)
 
-        bot = generate_answer(lesson, persona, history, user_q)
-        print("Tutor:", bot)
+            # LLM call
+            print("\nthinking...\n")
+            try:
+                response = model.generate_content(messages)
+                ai_text = (response.text or "(No response)").strip()
+            except Exception as e:
+                ai_text = f"Model error: {e}"
 
-        # Save messages
-        append_message(assessment_id, "user", user_q)
-        append_message(assessment_id, "assistant", bot)
+            # Show response
+            print(ai_text)
 
-        # Update history
-        history.append({"role": "user", "text": user_q})
-        history.append({"role": "assistant", "text": bot})
+            # Save AI message
+            chat_history.append({"role": "model", "content": ai_text})
+    finally:
+        print("\nEnding chat. Saving history...")
+        try:
+            save_history(module_id, chat_history)
+            print("Chat saved to chat_history.json")
+        except Exception as e:
+            print(f"Failed to save chat history: {e}")
 
 
 if __name__ == "__main__":

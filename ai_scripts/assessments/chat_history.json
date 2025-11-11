@@ -1,0 +1,30 @@
+{
+  "4f19705a-019d-4aca-8f5f-058eb435459e": [
+    {
+      "role": "user",
+      "content": "examples of uninformed search algorithms"
+    },
+    {
+      "role": "model",
+      "content": "Based on the provided material, the search algorithms that don't use a heuristic `h(n)` (an estimated distance to the goal) are:\n\n*   **Breadth-First Search (BFS):** This explores nodes by layers using a queue.\n*   **Depth-First Search (DFS):** This explores deep along a branch using a stack or recursion.\n\nThese contrast with Greedy Best-First and A* search, which are guided by a heuristic function `h(n)`."
+    },
+    {
+      "role": "user",
+      "content": "explain breadth-first search"
+    },
+    {
+      "role": "model",
+      "content": "Hello! Breadth-First Search (BFS) is a search algorithm that explores the state space **layer by layer**.\n\nIt uses a FIFO (First-In, First-Out) queue to explore all the neighbors of the current state before moving on to the next level of states.\n\nThis method guarantees finding the **fewest-steps solution** when all actions have an equal cost. It is a **complete** algorithm, meaning it will find a solution if one exists."
+    }
+  ],
+  "095de093-56f8-49e2-8bf1-0a0f7ff9e6eb": [
+    {
+      "role": "user",
+      "content": "what is HMMs"
+    },
+    {
+      "role": "model",
+      "content": "Hello! A Hidden Markov Model (HMM) is a model that defines a sequence of hidden states and a corresponding sequence of observations.\n\nIt has three main parts:\n*   **Initial state distribution (`π`):** The probability of starting in each state.\n*   **Transition probabilities (`A`):** The probability of moving from one hidden state to another.\n*   **Emission probabilities (`B`):** The probability of seeing a particular observation, given you are in a certain hidden state.\n\nHMMs also have the **Markov property**, which means the current hidden state only depends on the previous hidden state."
+    }
+  ]
+}
