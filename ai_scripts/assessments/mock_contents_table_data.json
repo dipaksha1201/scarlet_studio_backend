@@ -1,0 +1,170 @@
+[
+  {
+    "id": "22c7bdf1-2ce7-4709-8bf5-ebe1649711ce",
+    "module_id": "4f19705a-019d-4aca-8f5f-058eb435459e",
+    "generated_text": "### Search Problems and State Spaces\nA search problem consists of:\n- **State space** `S`\n- **Initial state** `s_0`\n- **Actions / transition model** `T(s,a) -> s'`\n- **Goal test** `G(s)`\n- **Path cost** `c(s,a,s')` and **solution cost** `g(n)`\n\nSearch explores a **tree/graph** of states to discover a sequence of actions from `s_0` to a goal.",
+    "last_prompt": "teach:v3",
+    "is_edited": false,
+    "updated_at": "2025-11-11T21:58:55Z"
+  },
+  {
+    "id": "3b5fd039-146a-4e58-ab34-62b67af461eb",
+    "module_id": "4f19705a-019d-4aca-8f5f-058eb435459e",
+    "generated_text": "### Breadth-First Search (BFS)\nExplore nodes by **layers** using a FIFO queue. Guarantees the **fewest-steps solution** when all actions have equal cost.\n\n**Tree-search pseudocode**\n```\nBFS(start, goal_test):\n    Q = queue([start]); parent = {start: None}; visited = {start}\n    while Q:\n        n = Q.dequeue()\n        if goal_test(n): return path(parent, n)\n        for s in successors(n):\n            if s not in visited:\n                visited.add(s); parent[s] = n; Q.enqueue(s)\n    return failure\n```\n**Guarantees:** Complete; **Optimal** for unit cost.  \n**Cost:** Time/Space `O(b^d)`.",
+    "last_prompt": "teach:v3",
+    "is_edited": false,
+    "updated_at": "2025-11-11T21:58:55Z"
+  },
+  {
+    "id": "40df7a3c-8f34-4bc4-986a-0df33574be05",
+    "module_id": "4f19705a-019d-4aca-8f5f-058eb435459e",
+    "generated_text": "### Depth-First Search (DFS)\nExplore **deep** along a branch using a stack/recursion; backtrack when stuck.\n\n**Recursive form**\n```\nDFS(n):\n    if goal(n): return [n]\n    mark n\n    for s in successors(n):\n        if s unmarked:\n            p = DFS(s)\n            if p != failure: return [n] + p\n    return failure\n```\n**Pros:** Low memory `O(b*m)`. **Cons:** Not complete (unless depth-limited), not optimal.",
+    "last_prompt": "teach:v3",
+    "is_edited": false,
+    "updated_at": "2025-11-11T21:58:55Z"
+  },
+  {
+    "id": "dd401a87-19e2-4047-a094-f85fbf4c6506",
+    "module_id": "4f19705a-019d-4aca-8f5f-058eb435459e",
+    "generated_text": "### Greedy Best-First Search\nSelect node with **smallest heuristic** `h(n)` (estimated distance to goal). Uses a priority queue ordered by `h`.  \n**Strength:** Often very fast. **Weakness:** Not optimal; can be misled by poor `h`.",
+    "last_prompt": "teach:v3",
+    "is_edited": false,
+    "updated_at": "2025-11-11T21:58:55Z"
+  },
+  {
+    "id": "e37d2325-3c54-42cd-aa5c-ab696c3b3758",
+    "module_id": "4f19705a-019d-4aca-8f5f-058eb435459e",
+    "generated_text": "### A* Search\nEvaluate with `f(n) = g(n) + h(n)`. Expand node with smallest `f`.  \nIf `h` is **admissible** (never overestimates) and **consistent**, A* is **optimal** and usually expands far fewer nodes than BFS/UCS.\n\n**Sketch**\n```\nOPEN = priority queue by f; add start\ng[start]=0; parent[start]=None\nwhile OPEN:\n    n = argmin_f(OPEN); remove n\n    if goal(n): return path(parent, n)\n    for s in successors(n):\n        t = g[n] + cost(n,s)\n        if s not in g or t < g[s]:\n            g[s] = t; parent[s] = n\n            f[s] = g[s] + h(s)\n            OPEN.upsert(s, f[s])\n```",
+    "last_prompt": "teach:v3",
+    "is_edited": false,
+    "updated_at": "2025-11-11T21:58:55Z"
+  },
+  {
+    "id": "4a7062d8-59e8-472d-8431-15918840da37",
+    "module_id": "4f19705a-019d-4aca-8f5f-058eb435459e",
+    "generated_text": "### Comparative Summary\n| Algorithm | Complete | Optimal | Time | Space |\n|---|---|---|---|---|\n| BFS| ✔| ✔ (unit)| O(b^d)| O(b^d)|\n| DFS| ✖| ✖| O(b^m)| O(b*m)|\n| Greedy| ✖| ✖| depends h| depends h|\n| A*| ✔| ✔ (adm/cons h)| exp| exp|",
+    "last_prompt": "teach:v3",
+    "is_edited": false,
+    "updated_at": "2025-11-11T21:58:55Z"
+  },
+  {
+    "id": "8b63c80e-32bf-49f3-8a58-f4aa736c77ae",
+    "module_id": "0176a2e2-3291-4018-9cf4-c9c1e40384c1",
+    "generated_text": "### Heuristics: Purpose and Properties\nA **heuristic** `h(n)` estimates the remaining cost from node `n` to a goal. Good heuristics guide search to expand **fewer nodes** while preserving solution quality.\n\n**Desirable properties**\n- **Admissible:** `h(n) ≤ h*(n)` (never overestimates true remaining cost).\n- **Consistent (monotone):** `h(n) ≤ cost(n,s) + h(s)` for any successor `s`.\nConsistency ⇒ A*’s `f(n)` values are nondecreasing along a path, enabling optimal graph-search with no re-expansions.",
+    "last_prompt": "teach:v3",
+    "is_edited": false,
+    "updated_at": "2025-11-11T21:58:55Z"
+  },
+  {
+    "id": "8ebc97da-59d4-4f3d-8c38-231ffaf23f92",
+    "module_id": "0176a2e2-3291-4018-9cf4-c9c1e40384c1",
+    "generated_text": "### Designing Heuristics\n**Abstractions:** Relax constraints to get a cheaper, solvable problem; the exact solution cost in the relaxed problem is an admissible heuristic.\n**Examples**\n- **Grid pathfinding:** Manhattan distance (4-neighbor), Euclidean distance (8-neighbor), Chebyshev distance.\n- **Puzzles:** Number of misplaced tiles; sum of Manhattan distances of tiles (15-puzzle).\n\n**Heuristic domination:** If `h1(n) ≥ h2(n)` for all `n`, then `h1` **dominates** `h2` (leads to fewer expansions) while remaining admissible.",
+    "last_prompt": "teach:v3",
+    "is_edited": false,
+    "updated_at": "2025-11-11T21:58:55Z"
+  },
+  {
+    "id": "935fd285-be28-4927-a641-2c2ef5efea8c",
+    "module_id": "0176a2e2-3291-4018-9cf4-c9c1e40384c1",
+    "generated_text": "### Local Search: Hill Climbing\nOptimize an objective over a single current state (no path memory).\n\n**Hill Climbing**\n- Start with a candidate solution.\n- Move to a neighbor with **strictly better** value.\n- Stop when no neighbor improves the value.\n\n**Issues:** local maxima, plateaus, ridges.  \n**Fixes:** random restarts, sideways moves, and stochastic variants.",
+    "last_prompt": "teach:v3",
+    "is_edited": false,
+    "updated_at": "2025-11-11T21:58:55Z"
+  },
+  {
+    "id": "848fbc7f-6242-47f4-b511-329d855962f1",
+    "module_id": "0176a2e2-3291-4018-9cf4-c9c1e40384c1",
+    "generated_text": "### Local Search: Simulated Annealing\nAdds controlled randomness to escape local maxima.\n\n**Algorithm sketch**\n```\nSimulatedAnnealing(x0, T0):\n    x <- x0; T <- T0\n    while T > Tmin:\n        x' <- random_neighbor(x)\n        Δ <- value(x') - value(x)\n        if Δ > 0: x <- x'\n        else if rand() < exp(Δ / T): x <- x'\n        T <- schedule(T)\n    return x\n```\nAt high `T`, bad moves are accepted with higher probability; as `T` cools, the search becomes greedier.",
+    "last_prompt": "teach:v3",
+    "is_edited": false,
+    "updated_at": "2025-11-11T21:58:55Z"
+  },
+  {
+    "id": "21482e11-6fb2-40e0-99c6-96d4aabc64ee",
+    "module_id": "0176a2e2-3291-4018-9cf4-c9c1e40384c1",
+    "generated_text": "### Constraint Satisfaction Problems (CSPs)\nModel with **variables** `X1..Xn`, **domains** `D1..Dn`, and **constraints** on allowed assignments.\n\n**Backtracking Search**\n- Choose an unassigned variable.\n- Choose a value.\n- Check constraints; backtrack on failure.\n\n**Inference & Heuristics**\n- **MRV (Minimum Remaining Values):** pick variable with fewest legal values.\n- **Degree heuristic:** break ties by most-constraining variable.\n- **LCV (Least Constraining Value):** pick value that rules out the fewest options for others.\n- **Arc consistency (AC-3):** prune unsupported values before/during search.",
+    "last_prompt": "teach:v3",
+    "is_edited": false,
+    "updated_at": "2025-11-11T21:58:55Z"
+  },
+  {
+    "id": "8388c4a9-8129-4aac-84e3-d0eb5c738a5a",
+    "module_id": "095de093-56f8-49e2-8bf1-0a0f7ff9e6eb",
+    "generated_text": "### HMM Foundations\nA **Hidden Markov Model (HMM)** defines a sequence of **hidden states** `Z1..ZT` and **observations** `X1..XT`.\n- Initial state distribution `π`\n- Transition probabilities `A[i,j] = P(Z_t=j | Z_{t-1}=i)`\n- Emission probabilities `B[j,k] = P(X_t=k | Z_t=j)` (discrete) or continuous densities\n\n**Markov property:** `P(Z_t | Z_{1:t-1}) = P(Z_t | Z_{t-1})`.",
+    "last_prompt": "teach:v3",
+    "is_edited": false,
+    "updated_at": "2025-11-11T21:58:55Z"
+  },
+  {
+    "id": "4e617ef6-9a53-4cb9-a573-38259a351cc3",
+    "module_id": "095de093-56f8-49e2-8bf1-0a0f7ff9e6eb",
+    "generated_text": "### Forward Algorithm (Filtering / Likelihood)\nComputes `α_t(j) = P(X_{1:t}, Z_t=j)` efficiently via dynamic programming.\n\n**Recurrence**\n```\nα_1(j) = π[j] * B[j, x1]\nα_t(j) = B[j, xt] * Σ_i α_{t-1}(i) * A[i,j]\n```\n**Likelihood:** `P(X_{1:T}) = Σ_j α_T(j)`\nUse **scaling** or **log-space** to avoid underflow for long sequences.",
+    "last_prompt": "teach:v3",
+    "is_edited": false,
+    "updated_at": "2025-11-11T21:58:55Z"
+  },
+  {
+    "id": "61bc272a-1e52-4f08-ac90-8aecf2133f92",
+    "module_id": "095de093-56f8-49e2-8bf1-0a0f7ff9e6eb",
+    "generated_text": "### Backward & Smoothing\nThe **backward** messages `β_t(i) = P(X_{t+1:T} | Z_t=i)` allow smoothing `P(Z_t | X_{1:T}) ∝ α_t ⊙ β_t`.\n\n**Backward recurrence**\n```\nβ_T(i) = 1\nβ_t(i) = Σ_j A[i,j] * B[j, x_{t+1}] * β_{t+1}(j)\n```",
+    "last_prompt": "teach:v3",
+    "is_edited": false,
+    "updated_at": "2025-11-11T21:58:55Z"
+  },
+  {
+    "id": "deb5c252-aca0-41b6-a714-49f0894f3db0",
+    "module_id": "095de093-56f8-49e2-8bf1-0a0f7ff9e6eb",
+    "generated_text": "### Viterbi Algorithm (Most Likely State Sequence)\nFinds `ẑ_{1:T} = arg max P(Z_{1:T} | X_{1:T})` via dynamic programming with max instead of sum.\n\n**Recurrence**\n```\nδ_1(j) = log π[j] + log B[j, x1]\nψ_1(j) = 0\nδ_t(j) = log B[j, xt] + max_i ( δ_{t-1}(i) + log A[i,j] )\nψ_t(j) = argmax_i ( δ_{t-1}(i) + log A[i,j] )\n```\nBacktrack from `argmax_j δ_T(j)` using `ψ`.",
+    "last_prompt": "teach:v3",
+    "is_edited": false,
+    "updated_at": "2025-11-11T21:58:55Z"
+  },
+  {
+    "id": "c589738b-5978-4667-9236-9849256bb969",
+    "module_id": "095de093-56f8-49e2-8bf1-0a0f7ff9e6eb",
+    "generated_text": "### Baum–Welch (EM) for Parameter Learning\nIteratively maximize `P(X_{1:T} | θ)` when states are hidden.\n\n**E-step:** compute expected transitions/emissions using forward–backward (γ, ξ).  \n**M-step:** update `π`, `A`, `B` from expectations (with smoothing if needed).  \nRepeat until convergence of log-likelihood.",
+    "last_prompt": "teach:v3",
+    "is_edited": false,
+    "updated_at": "2025-11-11T21:58:55Z"
+  },
+  {
+    "id": "4fb6331e-44c4-4300-951b-4711a63812aa",
+    "module_id": "970837d7-de18-407e-8f6d-bffb2245dfd7",
+    "generated_text": "### Applications of HMMs\n- **Speech recognition:** acoustic feature sequences → phoneme/state sequences.\n- **Part-of-speech tagging:** words → POS tags.\n- **Gesture/activity recognition:** sensor streams → activity labels.\n- **Bioinformatics:** motif discovery, gene prediction.",
+    "last_prompt": "teach:v3",
+    "is_edited": false,
+    "updated_at": "2025-11-11T21:58:55Z"
+  },
+  {
+    "id": "3f51ec2c-3388-47e0-9074-9f86e9798f44",
+    "module_id": "970837d7-de18-407e-8f6d-bffb2245dfd7",
+    "generated_text": "### Numerical Stability & Scaling\nLong sequences underflow in probability space. Use:\n- **Log-space** computations (sum becomes log-sum-exp).\n- **Per-time scaling factors** for forward/backward passes.\nThese preserve numerical stability without changing MAP sequence.",
+    "last_prompt": "teach:v3",
+    "is_edited": false,
+    "updated_at": "2025-11-11T21:58:55Z"
+  },
+  {
+    "id": "6e277bcf-73a6-4be9-9804-c138e9c24fcd",
+    "module_id": "970837d7-de18-407e-8f6d-bffb2245dfd7",
+    "generated_text": "### Continuous Emissions\nReplace discrete `B[j,k]` with **Gaussian** or **Gaussian Mixture Models (GMMs)**:\n`p(x_t | Z_t=j) = Σ_m w_{j,m} 𝒩(x_t | μ_{j,m}, Σ_{j,m})`.\nEM generalizes with responsibilities over mixture components.",
+    "last_prompt": "teach:v3",
+    "is_edited": false,
+    "updated_at": "2025-11-11T21:58:55Z"
+  },
+  {
+    "id": "8dd015e3-2e60-4b61-9df2-3d658b758262",
+    "module_id": "970837d7-de18-407e-8f6d-bffb2245dfd7",
+    "generated_text": "### Higher-Order and Duration Models\n- **Higher-order HMMs:** dependence on multiple past states; often converted to first-order by state augmentation.\n- **Hidden semi-Markov models (HSMM):** explicit **state durations**.\nThese capture richer temporal dynamics when first-order Markov is insufficient.",
+    "last_prompt": "teach:v3",
+    "is_edited": false,
+    "updated_at": "2025-11-11T21:58:55Z"
+  },
+  {
+    "id": "b991767f-1c58-4399-a9e7-abbd1f017b64",
+    "module_id": "970837d7-de18-407e-8f6d-bffb2245dfd7",
+    "generated_text": "### Model Selection & Regularization\nChoose the number of states/components via **AIC/BIC** or cross-validation.  \nUse priors/penalties to avoid overfitting; tie/cluster parameters across states when data is scarce.",
+    "last_prompt": "teach:v3",
+    "is_edited": false,
+    "updated_at": "2025-11-11T21:58:55Z"
+  }
+]

@@ -1,209 +1,194 @@
 import os
-import time
-from typing import TypedDict, List, Tuple
-
+import json
+from typing import List
 from dotenv import load_dotenv
-from langgraph.graph import StateGraph, END
 import google.generativeai as genai
-# We'll use LangChain's message types to store the chat history
-from langchain_core.messages import BaseMessage, HumanMessage, AIMessage
+from supabase import create_client, Client
 
+# ============================================================
+# ✅ 1. LOAD .env (with debug prints)
+# ============================================================
 
-# Load environment variables
-load_result = load_dotenv()
-print(f"--- .env file detected? {load_result} ---", flush=True) 
+print("🔍 Loading .env…")
+load_dotenv()
 
-# Configure the Google client
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_SERVICE_KEY = os.getenv("SUPABASE_SERVICE_KEY")
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
-if not GOOGLE_API_KEY:
-    print("Warning: GOOGLE_API_KEY not set.", flush=True)
-else:
-    genai.configure(api_key=GOOGLE_API_KEY)
 
-# Initialize the Generative Model
-# We are NOT using JSON mode here, we want natural text responses.
+if not SUPABASE_URL or not SUPABASE_SERVICE_KEY:
+    raise ValueError("❌ Supabase URL or SERVICE KEY missing!")
+
+if not GOOGLE_API_KEY:
+    raise ValueError("❌ Google API Key missing!")
+
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
+genai.configure(api_key=GOOGLE_API_KEY)
 model = genai.GenerativeModel("gemini-2.5-pro")
 
-
-class ChatTutorState(TypedDict):
-    """
-    Defines the memory for our chat agent.
-    """
-    lesson_content: str
-    # The chat_history will be a list of HumanMessage and AIMessage objects
-    chat_history: List[BaseMessage]
+# ===============================================================
+# ✅ Fetch module + content + learner persona
+# ===============================================================
 
 
+def fetch_module_context(module_id):
+    # Fetch module
+    mod = supabase.table("modules").select("*").eq("id", module_id).execute()
+    if not mod.data:
+        raise ValueError("❌ Module not found.")
 
-def build_tutor_prompt(content: str, history: List[BaseMessage]) -> List[dict]:
-    """
-    Builds the full conversational history for the Gemini API,
-    including the system prompt.
-    """
-    
-    # This is the "system prompt" or main instruction for the tutor.
-    system_prompt = f"""
-    You are an expert AI tutor for a university. Your goal is to assess a student's understanding of the provided lesson.
-    
-    **Your Persona:**
-    - Friendly, encouraging, and Socratic.
-    - Never give the answer directly.
-    - Ask guiding questions to help the student arrive at the answer themselves.
-    - Keep your responses concise (2-3 sentences).
+    module = mod.data[0]
+    print("Module found:", module["title"])
 
-    **Lesson Content (Source of Truth):**
-    ---
-    {content}
-    ---
-    
-    **Your Task:**
-    - **If the chat history is empty:** Ask 1-2 open-ended, introductory questions based on the lesson to start the assessment. 
-    - **CRITICAL RULE FOR YOUR FIRST TURN:** Your entire response must be ONLY the 1-2 introductory questions. Do NOT repeat your persona, your instructions, or say "OK, I'm ready". Just ask the questions directly.
-    - **If the chat history is NOT empty:**
-        1.  Acknowledge the student's last answer (e.g., "That's a great point!", "You're on the right track...", "Not quite, let's think about...").
-        2.  Provide brief, guiding feedback.
-        3.  Ask a new, relevant follow-up question to probe deeper or move to the next concept.
-    """
-    
-    # Format the LangChain messages into the simple dict format Google's API needs
-    # [ {'role': 'user', 'parts': ['...']}, {'role': 'model', 'parts': ['...']} ]
-    
-    # Start with the system prompt as the first "user" message
-    formatted_history = [
-        {'role': 'user', 'parts': [system_prompt]}
+    # Fetch course
+    course = (
+        supabase.table("courses").select("*").eq("id", module["course_id"]).execute()
+    )
+    print("Course found:", course.data[0]["title"] if course.data else "N/A")
+
+    persona = course.data[0]["learner_persona"] if course.data else "curious learner"
+    print("Learner persona:", persona)
+
+    # Fetch lesson content
+    contents = (
+        supabase.table("contents").select("*").eq("module_id", module_id).execute()
+    )
+
+    lesson_blocks = [
+        c["generated_text"] for c in contents.data if c.get("generated_text")
     ]
-    
-    # Add the rest of the chat history
-    for msg in history:
-        role = "user" if isinstance(msg, HumanMessage) else "model"
-        formatted_history.append({'role': role, 'parts': [msg.content]})
-        
-    return formatted_history
+
+    if not lesson_blocks:
+        raise ValueError("❌ No generated_text found for this module in contents.")
+
+    lesson_text = "\n\n".join(lesson_blocks)
+
+    return module, persona, lesson_text
 
 
-def call_tutor_llm(state: ChatTutorState) -> dict:
-    """
-    This node is the "brain" of the tutor. It calls the LLM.
-    """
-    print("--- AI Tutor is thinking... ---", flush=True)
-    
-    # 1. Get state
-    content = state['lesson_content']
-    history = state['chat_history']
-    
-    # 2. Build the system instruction and the chat history
-    formatted_prompt = build_tutor_prompt(content, history)
-    
-    # 3. Calling the LLM
-    try:
-        # Pass the combined prompt/history
-        response = model.generate_content(formatted_prompt)
-        ai_response_text = response.text
-        
-        # 4. Add the new AI message to the history
-        return {"chat_history": [AIMessage(content=ai_response_text)]}
-        
-    except Exception as e:
-        print(f"Error calling LLM: {e}", flush=True)
-        return {"chat_history": [AIMessage(content="Sorry, I ran into an error. Could you try rephrasing that?")]}
+# ===============================================================
+# ✅ Create chat session in assessments
+# ===============================================================
 
 
-def get_student_response(state: ChatTutorState) -> dict:
-    """
-    This node STOPS the graph and waits for user input.
-    """
-    # 1. Get the latest AI message from the history
-    last_ai_message = state['chat_history'][-1].content
-    
-    # 2. Print it for the student
-    print(f"\nAI Tutor:\n{last_ai_message}\n", flush=True)
-    
-    # 3. Wait for the student to type a response
-    human_input = input("Your response (or type 'quit' to exit): ")
-    
-    # 4. Add the new human message to the history
-    return {"chat_history": [HumanMessage(content=human_input)]}
-
-
-
-
-def check_for_quit(state: ChatTutorState) -> str:
-    """
-    Checks the last human message to see if we should end the chat.
-    """
-    last_human_message = state['chat_history'][-1].content
-    
-    if last_human_message.lower() in ['quit', 'exit', "i'm done", 'stop']:
-        print("--- You've ended the chat. Great work! ---", flush=True)
-        return "end"
-    else:
-        return "continue"
-
-
-
-print("Building AI Tutor chatbot...", flush=True)
-
-builder = StateGraph(ChatTutorState)
-
-# Add the nodes
-builder.add_node("call_tutor_llm", call_tutor_llm)
-builder.add_node("get_student_response", get_student_response)
-
-# Set the entry point
-builder.set_entry_point("call_tutor_llm")
-
-# Build the graph edges (the loop)
-builder.add_edge("call_tutor_llm", "get_student_response")
-builder.add_conditional_edges(
-    "get_student_response",
-    check_for_quit,
-    {
-        "continue": "call_tutor_llm", # Loop back to the AI
-        "end": END
+def create_chat_session(module_id):
+    new_chat = {
+        "type": "chat_history",
+        "content_id": module_id,
+        "content": {"messages": []},
     }
-)
+    row = supabase.table("assessments").insert(new_chat).execute()
+    return row.data[0]["id"]
 
-# Compile the graph
-tutor_chat_graph = builder.compile()
 
-print("Chatbot compiled successfully!", flush=True)
+def append_message(assessment_id, role, text):
+    row = (
+        supabase.table("assessments")
+        .select("*")
+        .eq("id", assessment_id)
+        .execute()
+        .data[0]
+    )
+    content = row["content"]
 
+    if "messages" not in content:
+        content["messages"] = []
+
+    content["messages"].append({"role": role, "text": text})
+
+    supabase.table("assessments").update({"content": content}).eq(
+        "id", assessment_id
+    ).execute()
+
+
+# ===============================================================
+# ✅ Guardrails
+# ===============================================================
+
+
+def is_in_scope(question: str, lesson_text: str):
+    words = [w.lower() for w in question.split()]
+    hits = sum(1 for w in words if w in lesson_text.lower())
+
+    return hits > 0  # at least one overlap
+
+
+# ===============================================================
+# ✅ LLM Response
+# ===============================================================
+
+
+def generate_answer(lesson, persona, history, question):
+    system_prompt = f"""
+You are a personalized Q&A tutor.
+
+Persona: {persona}
+
+RULES:
+- Only answer using the lesson content provided.
+- If question is off-topic, politely redirect back to the module.
+- Keep responses short (2-4 sentences).
+- Do NOT add information not found in the lesson.
+
+LESSON CONTENT:
+---------------------------
+{lesson}
+---------------------------
+"""
+
+    messages = [{"role": "user", "parts": [system_prompt]}]
+
+    for msg in history:
+        messages.append({"role": msg["role"], "parts": [msg["text"]]})
+
+    messages.append({"role": "user", "parts": [question]})
+
+    response = model.generate_content(messages)
+    return response.text
+
+
+# ===============================================================
+# ✅ Main Chat Loop (Terminal)
+# ===============================================================
 
 
 def main():
-    """
-    Main function to run the chatbot.
-    """
-    
-    script_dir = os.path.dirname(__file__)
-    content_file_path = os.path.join(script_dir, "lesson_content.txt")
+    print("\n✅ Scarlet Q&A Tutor")
+    module_id = input("Enter module_id: ").strip()
 
-    try:
-        with open(content_file_path, "r") as f:
-            content = f.read()
-    except FileNotFoundError:
-        print(f"Error: 'lesson_content.txt' not found in {script_dir}", flush=True)
-        return
+    module, persona, lesson = fetch_module_context(module_id)
 
-    if content:
-        # Define the initial input for the graph
-        # The history starts empty!
-        initial_input = {
-            "lesson_content": content,
-            "chat_history": [],
-        }
-        
-        print("\n--- Starting AI Tutor Chat ---", flush=True)
-        
-        # Run the graph. This will now loop until you type 'quit'
-        # We use .stream() here instead of .invoke() to run the loop
-        for event in tutor_chat_graph.stream(initial_input):
-            # .stream() will yield the output of each node as it runs
-            # but we don't need to print it here, as the nodes print themselves.
-            pass
-            
-        print("\n--- Chat session finished. ---", flush=True)
+    assessment_id = create_chat_session(module_id)
+    print(f"✅ Chat session started: {assessment_id}\n")
+
+    history = []
+
+    while True:
+        user_q = input("You: ")
+
+        if user_q.lower() in ["quit", "exit", "bye"]:
+            print("👋 Ending chat.")
+            break
+
+        # Guardrail check
+        if not is_in_scope(user_q, lesson):
+            bot = "That question is outside today's module. Let's focus on the lesson."
+            print("Tutor:", bot)
+            append_message(assessment_id, "user", user_q)
+            append_message(assessment_id, "assistant", bot)
+            continue
+
+        bot = generate_answer(lesson, persona, history, user_q)
+        print("Tutor:", bot)
+
+        # Save messages
+        append_message(assessment_id, "user", user_q)
+        append_message(assessment_id, "assistant", bot)
+
+        # Update history
+        history.append({"role": "user", "text": user_q})
+        history.append({"role": "assistant", "text": bot})
+
 
 if __name__ == "__main__":
     main()
-
