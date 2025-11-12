@@ -11,6 +11,7 @@
         <entry key="0f2104ef-2065-4f3d-a9dd-02971738cc0f">
           <value>
             <set>
+              <option value="1e6afcde-3caf-429f-aa1e-d9e5adfafea9" />
               <option value="353369a3-1736-47c6-8157-fa0034192a20" />
               <option value="513f3174-cb34-4012-839a-6988d3338f92" />
               <option value="7cc0c222-bf87-4ecd-bd59-1831b72d3e90" />
@@ -41,6 +42,7 @@
           <option value="file://$PROJECT_DIR$/main.py" />
           <option value="file://$PROJECT_DIR$/generation/content.py" />
           <option value="file://$PROJECT_DIR$/generation/module.py" />
+          <option value="file://$PROJECT_DIR$/requirements.txt" />
         </set>
       </entry>
       <entry key="ba5fbe0b-6aaa-4ff8-979e-d0faab7e8aa0" />
