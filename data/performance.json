@@ -1,0 +1,57 @@
+[
+  {
+    "timestamp": "2025-11-12T05:21:23.846366Z",
+    "module": "networks",
+    "question": "Which statement best describes a fundamental purpose of computer networking principles in web communication?",
+    "selected_index": 1,
+    "selected_text": "To manage the internal operations of a single computer's processor.",
+    "correct_index": 2,
+    "correct_text": "To enable the movement and exchange of data between different interconnected devices.",
+    "correct": false,
+    "explanation": "Computer networking principles are foundational to understanding how information travels across the internet, enabling communication between various devices like clients and servers."
+  },
+  {
+    "timestamp": "2025-11-12T05:21:24.671923Z",
+    "module": "networks",
+    "question": "The HTTP protocol is crucial for web communication primarily because it dictates:",
+    "selected_index": 1,
+    "selected_text": "The standard format for encrypting all internet traffic.",
+    "correct_index": 2,
+    "correct_text": "How web browsers and servers request and deliver web-based resources.",
+    "correct": false,
+    "explanation": "HTTP (Hypertext Transfer Protocol) defines the rules for how web clients (like browsers) and servers communicate, specifically for requesting and sending web content and data."
+  },
+  {
+    "timestamp": "2025-11-12T05:21:25.339273Z",
+    "module": "networks",
+    "question": "To build web services that are inherently scalable and easier to maintain, which architectural style is typically favored, as introduced in this module?",
+    "selected_index": 1,
+    "selected_text": "Event-driven architecture",
+    "correct_index": 2,
+    "correct_text": "RESTful architecture",
+    "correct": false,
+    "explanation": "RESTful architecture emphasizes a stateless, client-server approach with a uniform interface, which contributes significantly to the scalability and maintainability of web services."
+  },
+  {
+    "timestamp": "2025-11-12T05:21:25.852068Z",
+    "module": "networks",
+    "question": "What characteristic makes JSON an ideal data format for exchanging information between clients and servers in web applications?",
+    "selected_index": 1,
+    "selected_text": "Its role as a proprietary format requiring specific licenses.",
+    "correct_index": 2,
+    "correct_text": "Its lightweight, human-readable structure that is easily parsed by machines.",
+    "correct": false,
+    "explanation": "JSON (JavaScript Object Notation) is valued for its lightweight nature and simplicity, allowing for efficient and easy-to-understand data exchange between different software components."
+  },
+  {
+    "timestamp": "2025-11-12T05:21:26.602256Z",
+    "module": "networks",
+    "question": "Interacting with simple web APIs is fundamental to modern web applications because it allows:",
+    "selected_index": 1,
+    "selected_text": "Different software components, like clients and servers, to communicate and share data.",
+    "correct_index": 1,
+    "correct_text": "Different software components, like clients and servers, to communicate and share data.",
+    "correct": true,
+    "explanation": "Web APIs serve as the crucial interface for enabling communication and data exchange between disparate software systems, which is the backbone of dynamic and interactive web applications."
+  }
+]
