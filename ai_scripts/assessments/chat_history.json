@@ -26,5 +26,15 @@
       "role": "model",
       "content": "Hello! A Hidden Markov Model (HMM) is a model that defines a sequence of hidden states and a corresponding sequence of observations.\n\nIt has three main parts:\n*   **Initial state distribution (`π`):** The probability of starting in each state.\n*   **Transition probabilities (`A`):** The probability of moving from one hidden state to another.\n*   **Emission probabilities (`B`):** The probability of seeing a particular observation, given you are in a certain hidden state.\n\nHMMs also have the **Markov property**, which means the current hidden state only depends on the previous hidden state."
     }
+  ],
+  "0176a2e2-3291-4018-9cf4-c9c1e40384c1": [
+    {
+      "role": "user",
+      "content": "explain Heuristics"
+    },
+    {
+      "role": "model",
+      "content": "Hello!\n\nA **heuristic** is a function, written as `h(n)`, that estimates the cost from a current node `n` to a goal.\n\nThe main purpose of a good heuristic is to guide a search algorithm so it expands **fewer nodes**, making the search more efficient.\n\nA heuristic has a few desirable properties:\n\n*   **Admissible:** It never overestimates the true cost to the goal.\n*   **Consistent:** It ensures that the estimated costs along a path do not decrease.\n\nFor example, in grid pathfinding, the Manhattan distance is a common heuristic."
+    }
   ]
 }

@@ -3,7 +3,7 @@ import json
 from typing import List
 from dotenv import load_dotenv
 import google.generativeai as genai
-
+from supabase import create_client, Client
 
 # --------------------------------------------------
 # Load environment
@@ -11,12 +11,34 @@ import google.generativeai as genai
 load_dotenv()
 
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_KEY = os.getenv("SUPABASE_SERVICE_KEY")
+
 if not GOOGLE_API_KEY:
     raise ValueError("Missing GOOGLE_API_KEY in .env")
+if not SUPABASE_URL or not SUPABASE_KEY:
+    raise ValueError("Missing Supabase credentials in .env")
 
-# Configure the Google client
 genai.configure(api_key=GOOGLE_API_KEY)
 model = genai.GenerativeModel("gemini-2.5-pro")
+
+# Supabase client
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+
+
+# --------------------------------------------------
+# Get module_id from Supabase using module name
+# --------------------------------------------------
+def fetch_module_id_by_name(module_name: str) -> str:
+    response = (
+        supabase.table("modules").select("id, title").eq("title", module_name).execute()
+    )
+
+    if not response.data:
+        raise ValueError(f"No module found matching: {module_name}")
+
+    print(f"Module ID found: {response.data[0]['id']}")
+    return response.data[0]["id"]  # return first match
 
 
 # --------------------------------------------------
@@ -69,9 +91,9 @@ You are a university Q&A tutor. Your knowledge is STRICTLY LIMITED to the follow
 
 RULES:
 - Answer ONLY using the above content.
-- If the user asks something outside the content, respond: "I can only answer based on the current module content."
-- Be short, and clear.
-- Set the tone: professor in a university course.
+- If the user asks something outside the content, respond:
+  "I can only answer based on the current module content."
+- Be friendly, short, and clear.
 """
 
     # Start the conversation by injecting the guardrails
@@ -119,8 +141,10 @@ def save_history(module_id: str, history: List[dict]):
 def main():
     print("  Scarlet Q&A Tutor\n")
 
-    module_id = input("Enter module_id: ").strip()
+    module_name = input("Enter module_name: ").strip()
     print("Loading module content...")
+
+    module_id = fetch_module_id_by_name(module_name)
 
     try:
         lesson_content = load_module_content(module_id)
@@ -147,7 +171,7 @@ def main():
             messages = build_prompt(lesson_content, chat_history)
 
             # LLM call
-            print("\nthinking...\n")
+            print("\nThinking...\n")
             try:
                 response = model.generate_content(messages)
                 ai_text = (response.text or "(No response)").strip()
