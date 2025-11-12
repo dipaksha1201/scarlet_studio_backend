@@ -1,0 +1,12 @@
+{
+  "modules": [
+    {
+      "module": "networks",
+      "description": "This module introduces the foundational principles of computer networking and web communication. You will explore how data moves across the internet using the HTTP protocol, understand how RESTful architecture enables scalable and maintainable web services, and learn how JSON serves as a lightweight data format for exchanging information between clients and servers. By the end of this module, you will be able to design and interact with simple web APIs and understand the essential mechanisms that power modern web applications."
+    },
+    {
+      "module": "machine_learning",
+      "description": "This module provides an in-depth exploration of core machine learning concepts and methodologies. You will study both supervised and unsupervised learning techniques, understanding how algorithms can be trained to make predictions or uncover patterns in data. The module also covers key evaluation methods for assessing model performance, including accuracy, precision, recall, and cross-validation. Through practical examples and case studies, you will gain hands-on experience applying machine learning algorithms to real-world datasets, preparing you for more advanced topics in data science and artificial intelligence."
+    }
+  ]
+}

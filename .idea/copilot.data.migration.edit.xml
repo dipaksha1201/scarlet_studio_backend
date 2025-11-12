@@ -1,6 +1,50 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="EditMigrationStateService">
-    <option name="migrationStatus" value="COMPLETED" />
+    <option name="migrationStatus" value="IN_PROGRESS" />
+    <option name="pendingSessionIds">
+      <option value="0f2104ef-2065-4f3d-a9dd-02971738cc0f" />
+      <option value="ba5fbe0b-6aaa-4ff8-979e-d0faab7e8aa0" />
+    </option>
+    <option name="pendingTurns">
+      <map>
+        <entry key="0f2104ef-2065-4f3d-a9dd-02971738cc0f">
+          <value>
+            <set>
+              <option value="353369a3-1736-47c6-8157-fa0034192a20" />
+              <option value="513f3174-cb34-4012-839a-6988d3338f92" />
+              <option value="7cc0c222-bf87-4ecd-bd59-1831b72d3e90" />
+              <option value="9dbea7a9-1c6a-47df-93f1-2a85e18ac063" />
+              <option value="b2407587-6720-4229-aec6-759c4d77a2c0" />
+              <option value="b81eeebb-fae1-4f34-ab29-281d4f06dad0" />
+            </set>
+          </value>
+        </entry>
+        <entry key="ba5fbe0b-6aaa-4ff8-979e-d0faab7e8aa0">
+          <value>
+            <set>
+              <option value="36ff404f-ee7f-4db8-962f-f989a5f1597e" />
+              <option value="5248a24c-cfdd-43da-82e1-c18c566bbd65" />
+              <option value="891bba78-65b7-4d9c-ac49-6c0b0c885297" />
+              <option value="8987cda1-800d-4b7b-9480-f1e3f263bfcf" />
+              <option value="8b1c6765-ef99-4ee9-8553-0be7148511de" />
+              <option value="e0aaa848-0eb6-4595-b5db-ceeef65f6b02" />
+            </set>
+          </value>
+        </entry>
+      </map>
+    </option>
+    <pendingWorkingSetItems>
+      <entry key="0f2104ef-2065-4f3d-a9dd-02971738cc0f">
+        <set>
+          <option value="file://$PROJECT_DIR$/data/quiz_output.json" />
+          <option value="file://$PROJECT_DIR$/main.py" />
+          <option value="file://$PROJECT_DIR$/generation/content.py" />
+          <option value="file://$PROJECT_DIR$/generation/module.py" />
+        </set>
+      </entry>
+      <entry key="ba5fbe0b-6aaa-4ff8-979e-d0faab7e8aa0" />
+      <entry key="c047a461-5ace-4ebf-8efb-e61bf46efa6f" />
+    </pendingWorkingSetItems>
   </component>
 </project>

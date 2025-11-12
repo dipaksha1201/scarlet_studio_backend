@@ -1,0 +1,122 @@
+{
+  "networks": {
+    "description": "This module introduces the foundational principles of computer networking and web communication. You will explore how data moves across the internet using the HTTP protocol, understand how RESTful architecture enables scalable and maintainable web services, and learn how JSON serves as a lightweight data format for exchanging information between clients and servers. By the end of this module, you will be able to design and interact with simple web APIs and understand the essential mechanisms that power modern web applications.",
+    "quizzes": [
+      {
+        "question": "Which protocol is the primary foundation for transmitting web pages and other resources across the internet, facilitating communication between web browsers and servers?",
+        "options": [
+          "FTP (File Transfer Protocol)",
+          "HTTP (Hypertext Transfer Protocol)",
+          "SMTP (Simple Mail Transfer Protocol)",
+          "TCP (Transmission Control Protocol)"
+        ],
+        "correct_option_index": 1,
+        "explanation": "HTTP is the core protocol used for web communication, allowing clients (like browsers) to request resources from servers and servers to send those resources back."
+      },
+      {
+        "question": "An architectural style that promotes building web services with characteristics such as scalability, maintainability, and a stateless nature is commonly referred to as:",
+        "options": [
+          "Monolithic architecture",
+          "SOAP-based services",
+          "RESTful architecture",
+          "Client-side rendering"
+        ],
+        "correct_option_index": 2,
+        "explanation": "RESTful architecture is widely adopted for web services because it encourages a simple, stateless approach that contributes to systems that are both scalable and easier to maintain."
+      },
+      {
+        "question": "For exchanging data efficiently and in a human-readable format between a client and a server in web applications, which lightweight data interchange format is frequently used?",
+        "options": [
+          "XML (eXtensible Markup Language)",
+          "CSV (Comma Separated Values)",
+          "JSON (JavaScript Object Notation)",
+          "YAML (YAML Ain't Markup Language)"
+        ],
+        "correct_option_index": 2,
+        "explanation": "JSON is a popular and lightweight data format specifically designed for simple and efficient data exchange in web applications, particularly between clients and servers."
+      },
+      {
+        "question": "A key outcome of understanding web APIs is the ability to:",
+        "options": [
+          "Completely bypass network security measures.",
+          "Develop desktop applications that do not require an internet connection.",
+          "Programmatically design and interact with web services to exchange information and utilize their functionality.",
+          "Improve the physical speed of internet cables and routers."
+        ],
+        "correct_option_index": 2,
+        "explanation": "Learning about web APIs empowers developers to build applications that can communicate with and leverage the services and data exposed by other applications over the internet."
+      },
+      {
+        "question": "Modern web applications fundamentally operate on the principle of:",
+        "options": [
+          "Direct peer-to-peer data transfer for all interactions.",
+          "Clients making requests to servers, which then respond with the requested information or perform actions.",
+          "Servers pushing all content to clients without any explicit requests.",
+          "All data processing being handled exclusively on the client's local machine."
+        ],
+        "correct_option_index": 1,
+        "explanation": "The core mechanism of modern web applications involves a client-server model where clients initiate communication (requests) and servers process these requests, sending back relevant responses."
+      }
+    ]
+  },
+  "machine_learning": {
+    "description": "This module provides an in-depth exploration of core machine learning concepts and methodologies. You will study both supervised and unsupervised learning techniques, understanding how algorithms can be trained to make predictions or uncover patterns in data. The module also covers key evaluation methods for assessing model performance, including accuracy, precision, recall, and cross-validation. Through practical examples and case studies, you will gain hands-on experience applying machine learning algorithms to real-world datasets, preparing you for more advanced topics in data science and artificial intelligence.",
+    "quizzes": [
+      {
+        "question": "Which category of machine learning is primarily concerned with training algorithms to make predictions or classifications based on data that includes known outcomes?",
+        "options": [
+          "Unsupervised learning",
+          "Reinforcement learning",
+          "Supervised learning",
+          "Generative learning"
+        ],
+        "correct_option_index": 2,
+        "explanation": "Supervised learning algorithms are designed to learn a mapping from input data to output labels, enabling them to make predictions or classifications on new, unseen data."
+      },
+      {
+        "question": "What is a main objective of unsupervised learning techniques?",
+        "options": [
+          "To predict specific numerical values for future events.",
+          "To uncover hidden structures or patterns within data without predefined labels.",
+          "To optimize a sequence of decisions through trial and error.",
+          "To generate synthetic data samples that resemble the training data."
+        ],
+        "correct_option_index": 1,
+        "explanation": "Unsupervised learning aims to discover intrinsic patterns, groupings, or dimensions within datasets where the output or target variable is not provided during training."
+      },
+      {
+        "question": "When assessing the performance of a machine learning model, which of the following is an evaluation method used to ensure the model generalizes well to new, unseen data by iteratively partitioning the dataset?",
+        "options": [
+          "Gradient descent",
+          "Feature engineering",
+          "Cross-validation",
+          "Data normalization"
+        ],
+        "correct_option_index": 2,
+        "explanation": "Cross-validation is a robust evaluation technique that involves splitting the dataset into multiple subsets to train and test the model, providing a more reliable measure of its generalization ability."
+      },
+      {
+        "question": "Which of these metrics specifically measures the proportion of actual positive cases that were correctly identified by a classification model?",
+        "options": [
+          "Accuracy",
+          "Precision",
+          "Recall",
+          "F1-score"
+        ],
+        "correct_option_index": 2,
+        "explanation": "Recall (also known as sensitivity or true positive rate) calculates the fraction of all relevant instances that were retrieved by the model."
+      },
+      {
+        "question": "A key practical component of studying machine learning involves what kind of activity?",
+        "options": [
+          "Memorizing theoretical definitions of all algorithms.",
+          "Applying algorithms to real-world datasets and analyzing case studies.",
+          "Developing new mathematical frameworks for learning models.",
+          "Simulating hypothetical data scenarios without practical implementation."
+        ],
+        "correct_option_index": 1,
+        "explanation": "The module emphasizes gaining hands-on experience by applying machine learning algorithms to practical examples and real-world datasets to solidify understanding."
+      }
+    ]
+  }
+}
