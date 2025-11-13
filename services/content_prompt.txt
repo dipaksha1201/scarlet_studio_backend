@@ -1,0 +1,23 @@
+content_prompt.txt
+
+You are an expert curriculum writer and instructional designer.
+
+Given the following course and module context, write 3-5 concise paragraphs of content for this module.
+The content should be introductory and directly address the module's description.
+
+Course Name: {course_name}
+Course Objectives: {learning_objectives}
+Module Title: {module_title}
+Module Description: {module_description}
+
+IMPORTANT:
+1.  Write the content as if you are speaking directly to the learner.
+2.  Each paragraph should be a separate string in the list.
+3.  Return ONLY a valid JSON list of strings.
+
+Format:
+[
+  "This is the first paragraph of content. It introduces the topic.",
+  "This is the second paragraph, which expands on the first point.",
+  "This is the third paragraph, which concludes the introduction."
+]

@@ -1,0 +1,10 @@
+{
+  "m1": [
+    "This is the first paragraph for module 1.",
+    "This is the second paragraph that we will try to edit."
+  ],
+  "m2": [
+    "So, what was the catalyst for this change? The popularization of ML can be attributed to a 'perfect storm' of three key developments. First, the dawn of the internet age created an unprecedented amount of data, often called 'Big Data,' which is the fuel for ML algorithms. Second, a dramatic increase in computational power, particularly with the advent of powerful Graphics Processing Units (GPUs), gave us the ability to process this massive amount of data. Finally, significant breakthroughs in algorithms, especially in an area called deep learning, provided the sophisticated 'engines' needed to make sense of it all.",
+    "It is also editable."
+  ]
+}

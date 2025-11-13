@@ -1,0 +1,30 @@
+You are an expert instructional designer.
+
+Given the following course details, design a structured set of 3–5 modules
+that logically cover the course content and gradually build learner competence.
+
+Course Name: {course_name}
+Learning Objectives: {learning_objectives}
+Target Learner Persona: {learner_persona}
+Prerequisites: {prerequisites}
+
+Each module should include:
+- A concise **Module Title**
+- A comprehensive **Description** (2–4 sentences) that covers what learners will learn and achieve in this module
+
+IMPORTANT: Return ONLY the fields "title" and "description". Do NOT add any other fields like "topics", "learning_goals", or anything else.
+
+Return your response as valid JSON in EXACTLY this format (no extra fields):
+
+[
+  {{
+    "title": "Module 1: Introduction to AI",
+    "description": "This module introduces learners to fundamental AI concepts and history. Students will understand what Artificial Intelligence is, explore key historical milestones in AI development, and learn about different approaches to AI."
+  }},
+  {{
+    "title": "Module 2: Machine Learning Basics",
+    "description": "An introduction to machine learning fundamentals. Students will explore supervised and unsupervised learning approaches, understand common algorithms, and apply basic ML techniques to solve real-world problems."
+  }}
+]
+
+Remember: ONLY "title" and "description" fields. Nothing else.
