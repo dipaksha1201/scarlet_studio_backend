@@ -1,0 +1,14 @@
+{
+  "m1": {
+    "course_name": "Artifical Intelligence",
+    "learning_objectives": "Learn about the concepts of the AI in modern applications.",
+    "module_title": "Module 1: Intro to Artificial Intelligence",
+    "module_description": "This module gives the introduction to the world of AI when it got popularized."
+  },
+  "m2": {
+    "course_name": "Machine Learning",
+    "learning_objectives": "Learn about the concepts of the Machine Learning in modern applications.",
+    "module_title": "Module 2: Intro to Machine Learning",
+    "module_description": "This module gives the introduction to the world of ML when it got popularized."
+  }
+}

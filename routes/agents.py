@@ -6,11 +6,36 @@ from services.module_gen import GeminiModuleAgent
 from services.module_service import ModuleService
 from utils.auth import get_optional_user_id
 
+
+from services.content_gen import GeminiContentAgent
+from services.content_service import ContentService
+from pydantic import BaseModel
+
+
 router = APIRouter()
 
 # Lazy initialization - don't instantiate until first use
 _agent = None
 _module_service = None
+
+_content_agent = None
+_content_service = None
+
+
+def get_content_agent() -> GeminiContentAgent:
+    """Get or create the GeminiContentAgent instance."""
+    global _content_agent
+    if _content_agent is None:
+        _content_agent = GeminiContentAgent()
+    return _content_agent
+
+def get_content_service() -> ContentService:
+    """Get or create the ContentService instance."""
+    global _content_service
+    if _content_service is None:
+        _content_service = ContentService()
+    return _content_service
+
 
 def get_agent() -> GeminiModuleAgent:
     """Get or create the GeminiModuleAgent instance."""
@@ -37,6 +62,14 @@ class ModuleRequest(BaseModel):
 
 class ModuleEditRequest(BaseModel):
     course_id: str
+    edit_instruction: str
+    
+    
+class ContentRequest(BaseModel):
+    module_id: str
+
+class ContentEditRequest(BaseModel):
+    module_id: str
     edit_instruction: str
 
 
@@ -68,7 +101,7 @@ async def generate_modules_with_gemini(
             payload.learning_objectives,
             payload.learner_persona,
             payload.prerequisites,
-            instructor_id,
+            instructor_id, # type: ignore
         )
         return {
             "course_id": payload.course_id,
@@ -138,3 +171,64 @@ def list_all_courses():
         "course_ids": course_ids,
         "count": len(course_ids)
     }
+
+
+# --- Content Generation Endpoints ---
+
+
+@router.post("/content/gemini-generate", tags=["AI Agents"])
+async def generate_content_with_gemini(payload: ContentRequest):
+    """
+    Generate 3-5 introductory paragraphs for a specific module using Gemini.
+    The generated content is automatically stored in the database.
+    """
+    try:
+        agent = get_content_agent()
+        paragraphs = agent.generate_content(payload.module_id)
+        return {
+            "module_id": payload.module_id,
+            "content": paragraphs,
+            "message": f"Content paragraphs saved to database for module_id '{payload.module_id}'"
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Gemini content generation failed: {e}")
+
+
+@router.post("/content/gemini-edit", tags=["AI Agents"])
+def edit_content_with_gemini(payload: ContentEditRequest):
+    """
+    Edit existing module content (paragraphs) using natural language.
+    The system automatically retrieves, edits, and re-saves the content.
+    """
+    try:
+        agent = get_content_agent()
+        edited_paragraphs = agent.edit_content(
+            payload.module_id,
+            payload.edit_instruction,
+        )
+        return {
+            "module_id": payload.module_id,
+            "content": edited_paragraphs,
+            "message": "Content updated successfully"
+        }
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Gemini content editing failed: {e}")
+
+
+@router.get("/content/{module_id}", tags=["AI Agents"])
+def get_stored_content(module_id: str):
+    """
+Retrieve the currently stored content paragraphs for a module.
+    """
+    try:
+        content_service = get_content_service()
+        # Get the full records, not just simple format
+        content = content_service.get_content_for_module(module_id)
+        return {
+            "module_id": module_id,
+            "content": content
+        }
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
