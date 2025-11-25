@@ -4,6 +4,7 @@ import os
 from dotenv import load_dotenv
 from scarlet_studio_backend.ai_scripts.flashcard.flashcard_schema import Flashcard
 import json
+from langgraph.graph import StateGraph, END
 
 load_result = load_dotenv()
 print(f"--- .env file detected? {load_result} ---", flush=True) 
@@ -74,7 +75,7 @@ async def build_llm_prompt(content:str,avoid_list:List[str])->str:
     {json_schema}
     """
 
-def generate_flashcard(state:FlashCardState)->dict:
+async def generate_flashcard(state:FlashCardState)->dict:
     """
     Node that generates a new Flashcard based on the lesson content
     and avoiding previously generated questions.
@@ -85,11 +86,11 @@ def generate_flashcard(state:FlashCardState)->dict:
     content = state['lesson_content']
     avoid_list = state['questions_to_avoid']
 
-    prompt = build_llm_prompt(content,avoid_list)
+    prompt = await build_llm_prompt(content,avoid_list)
 
     response = model.generate_content(prompt)
 
-    card_data = json.loads(response.txt)
+    card_data = json.loads(response.text)
 
     flashcard = Flashcard(
         question=card_data['question'],
@@ -101,3 +102,96 @@ def generate_flashcard(state:FlashCardState)->dict:
     state["questions_to_avoid"].append(flashcard.question)
     
     return flashcard
+
+async def should_continue_generation(state:FlashCardState)->str:
+    """
+    Determines whether to continue generating more flashcards or to end.
+    """
+    num_generated = len(state['generated_flashcards'])
+    num_desired = state['num_flashcards_desired']
+    
+    print(f"--- Checking: {num_generated} generated, {num_desired} desired ---", flush=True)
+    
+    if num_generated < num_desired:
+        print("Decision: Continue", flush=True)
+        return "continue"
+    else:
+        print("Decision: End", flush = True)
+        return "end"
+
+async def create_flashcard_graph()->StateGraph:
+    """
+    Builds and compiles the LangGraph state machine.
+    """
+    print("Building Flashcard generation graph...", flush=True)
+    
+    builder = StateGraph(FlashCardState)
+    
+    # Add the single node for generating flashcards
+    builder.add_node("generate_flashcard", generate_flashcard)
+    
+    # Set the entry point for the graph
+    builder.set_entry_point("generate_flashcard")
+
+    # Add the conditional edge that creates the loop
+    builder.add_conditional_edges(
+        "generate_flashcard",
+        should_continue_generation,
+        {
+            "continue": "generate_flashcard",
+            "end": END
+        }
+    )
+    
+    
+    # Compile the graph
+    flashcard_graph = builder.compile()
+    print("Flashcard generation graph compiled successfully!", flush=True)
+    return flashcard_graph
+
+def main():
+    """
+    Main function to test the 'flashcard_graph' when this script is run directly.
+    """
+    print("Starting Flashcard generation...", flush=True)
+    
+    # Find the directory this script is in
+    script_dir = os.path.dirname(__file__)
+    # Create a path to 'lesson_content.txt' in that *same* directory
+    content_file_path = os.path.join(script_dir, "lesson_content.txt")
+
+    try:
+        with open(content_file_path, "r") as f:
+            content = f.read()
+    except FileNotFoundError:
+        print(f"Error: 'lesson_content.txt' not found in {script_dir}", flush=True)
+        print("Please create it in the 'scarlet_studio_backend/ai_scripts/flashcard' folder.", flush=True)
+        content = "" # Set to empty to avoid crashing
+
+    if content:
+        flashcard_graph = create_flashcard_graph()
+
+        initial_input = {
+            "lesson_content": content,
+            "num_flashcards_desired": 5,
+            "generated_flashcards": [],
+            "questions_to_avoid": []
+        }
+        
+        print("\n--- Invoking Graph ---", flush=True)
+        
+        # Run the graph
+        final_state = flashcard_graph.invoke(initial_input)
+        
+        print("\n--- Graph execution finished ---", flush=True)
+        
+        # Print the final generated flashcards
+        print("\nFinal Generated Flashcards:", flush=True)
+        for i, flashcard in enumerate(final_state['generated_flashcards']):
+            print(f"\nFlashcard {i+1}:", flush=True)
+            print(f"  Question: {flashcard.question}", flush=True)
+            print(f"  Answer: {flashcard.answer}", flush=True)
+            print(f"  Explanation: {flashcard.explanation}", flush=True)
+
+if __name__ == "__main__":
+    main()
